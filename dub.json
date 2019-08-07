@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"0x005c"
+	],
+	"copyright": "Copyright © 2019, 0x005c",
+	"dependencies": {
+		"imageformats": "~>7.0.0"
+	},
+	"description": "Blur filter for some image file formats",
+	"license": "MIT",
+	"name": "bokasu"
+}

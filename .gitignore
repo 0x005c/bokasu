@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/bokasu
+bokasu.so
+bokasu.dylib
+bokasu.dll
+bokasu.a
+bokasu.lib
+bokasu-test-*
+*.exe
+*.o
+*.obj
+*.lst
