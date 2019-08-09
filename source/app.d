@@ -89,7 +89,7 @@ int[] boxesForGauss(float sigma, int n) {  // standard deviation, number of boxe
 
 void boxBlur(ref IFImage source, ref IFImage target, int r) {
   for(int i=0; i<source.pixels.length; i++) target.pixels[i] = source.pixels[i];
-  // boxBlurH(target, source, r);
+  boxBlurH(target, source, r);
   boxBlurT(source, target, r);
 }
 
@@ -100,25 +100,25 @@ void boxBlurH(ref IFImage source, ref IFImage target, int r) {
   int h = source.h;
 
   for(int i=0; i<h; i++) {
-    int ti = i*w, li = ti, ri = ti+r;
-    int fv = source.pixels[ti], lv = source.pixels[ti+w-1], val = (r+1)*fv;
-    for(int j=0; j<=r; j+=4) {
-      val += source.pixels[ri] - fv;
-      target.pixels[ti] = to!ubyte(round(val*iarr));
-      // ri += colorPerPixel; li += colorPerPixel;
-      ri++; li++;
-    }
-    for(int j=r+1; j<w-r; j+=4) {
-      val += source.pixels[ri] - source.pixels[li];
-      target.pixels[ti] = to!ubyte(round(val*iarr));
-      // ri += colorPerPixel; li += colorPerPixel; ti += colorPerPixel;
-      ri++; li++; ti++;
-    }
-    for(int j=w-r; j<w; j+=4) {
-      val += lv - source.pixels[li];
-      target.pixels[ti] = to!ubyte(round(val*iarr));
-      // li += colorPerPixel; ti += colorPerPixel;
-      li++; ti++;
+    for(int color=0; color<colorPerPixel; color++) {
+      int ti = i*w+color, li = ti, ri = ti+r*colorPerPixel;
+      int fv = source.pixels[ti], lv = source.pixels[ti+w-colorPerPixel], val = (r+1)*fv;
+      for(int j=0; j<r*colorPerPixel; j+=colorPerPixel) val += source.pixels[ti+j];
+      for(int j=0; j<=r*colorPerPixel; j+=colorPerPixel) {
+        val += source.pixels[ri] - fv;
+        target.pixels[ti] = to!ubyte(round(val*iarr));
+        ri+=colorPerPixel; ti+=colorPerPixel;
+      }
+      for(int j=(r+1)*colorPerPixel; j<w-r*colorPerPixel; j+=colorPerPixel) {
+        val += source.pixels[ri] - source.pixels[li];
+        target.pixels[ti] = to!ubyte(round(val*iarr));
+        ri+=colorPerPixel; li+=colorPerPixel; ti+=colorPerPixel;
+      }
+      for(int j=w-r*colorPerPixel; j<w; j+=colorPerPixel) {
+        val += lv - source.pixels[li];
+        target.pixels[ti] = to!ubyte(round(val*iarr));
+        li+=colorPerPixel; ti+=colorPerPixel;
+      }
     }
   }
 }
