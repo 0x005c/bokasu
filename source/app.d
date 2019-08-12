@@ -5,34 +5,52 @@ void main(string[] args) {
   string mode = "blur"; // mosaic or blur
   int strength = 3;
   string inFileName = "";
-  string outFileName = "";
+  string outFileName = "out.png";
 
   // parse arguments
   auto helpInformation = getopt(
       args,
-      "mode|m", "Choose from mosaic or blur.", &mode,
-      "strength|s", "Set filter strength.", &strength,
-      "input|i", "Input file name.", &inFileName,
-      "output|o", "Output file name.", &outFileName
+      "mode|m"    , "Choose from mosaic or blur. (default: blur)", &mode,
+      "strength|s", "Set filter strength. (default: 3)"          , &strength,
+      "input|i"   , "Input file name."                           , &inFileName,
+      "output|o"  , "Output file name. (default: out.png)"       , &outFileName
       );
 
   // handle -h option
   if(helpInformation.helpWanted) {
     help(helpInformation);
     return;
+  // when file name is empty
+  } else if(inFileName == "") {
+    writeln("- Input file name is empty.");
+    writeln(); // new line again
+    help(helpInformation);
   // open file, process image, and save file
   } else {
-    IFImage source  = read_image(inFileName); // autodetect color setting
+    IFImage source;
+
+    // open input file
+    try {
+      source = read_image(inFileName); // autodetect color setting
+    } catch(std.exception.Exception) {
+      writeln("Failed to open ", inFileName);
+      return;
+    }
+
+    // set target image information
     IFImage target;
     target.c = source.c;
     target.w = source.w;
     target.h = source.h;
     target.pixels.length = source.pixels.length;
 
+    // check mode
     if(mode == "mosaic") mosaic(strength, source, target);
     else if(mode == "blur") blur(strength, source, target);
     // if invalid mode is set
     else {
+      writeln("- Invalid mode name ", mode);
+      writeln(); // new line again
       help(helpInformation);
       return;
     }
@@ -68,6 +86,7 @@ void mosaic(int strength, ref IFImage source, ref IFImage target) {
   }
 }
 
+// source code below is based on http://blog.ivank.net/fastest-gaussian-blur.html
 void blur(int strength, ref IFImage source, ref IFImage target) {
   int[] bxs = boxesForGauss(strength,3);
   boxBlur(source, target, (bxs[0]-1)/2);
